@@ -1,0 +1,150 @@
+#region VEXcode Generated Robot Configuration
+from vex import *
+import urandom
+
+# Brain should be defined by default
+brain=Brain()
+
+# Robot configuration code
+brain_inertial = Inertial()
+left_drive_smart = Motor(Ports.PORT7, 1, False)
+right_drive_smart = Motor(Ports.PORT11, 1, True)
+
+drivetrain = SmartDrive(left_drive_smart, right_drive_smart, brain_inertial, 200)
+touch = Touchled(Ports.PORT5)
+shoot_motor_a = Motor(Ports.PORT9, True)
+shoot_motor_b = Motor(Ports.PORT12, False)
+shoot = MotorGroup(shoot_motor_a, shoot_motor_b)
+arm = Motor(Ports.PORT8, False)
+roller = Motor(Ports.PORT6, False)
+
+
+def calibrate_drivetrain():
+    # Calibrate the Drivetrain Inertial
+    sleep(200, MSEC)
+    brain.screen.print("Calibrating")
+    brain.screen.next_row()
+    brain.screen.print("Inertial")
+    brain_inertial.calibrate()
+    while brain_inertial.is_calibrating():
+        sleep(25, MSEC)
+    brain.screen.clear_screen()
+    brain.screen.set_cursor(1, 1)
+#endregion VEXcode Generated Robot Configuration
+
+# ------------------------------------------
+# 
+# 	Project:      VEXcode Project
+# 	Author:       VEX
+# 	Created:
+# 	Description:  VEXcode IQ Python Project
+# 
+# ------------------------------------------
+
+# Library imports
+from vex import *
+
+# Begin project code
+percisestatus = False
+status = False
+rapidstatus = False
+armup = False
+arm.set_max_torque(100,PERCENT)
+punchstatus = False
+arm.set_position(0,DEGREES)
+print("this is a stupid auto code")
+def rapidfire():
+    global rapidstatus
+    if rapidstatus == True:
+        shoot.set_velocity(30,PERCENT)
+        rapidstatus = False
+    else:
+        shoot.stop()
+        shoot.set_velocity(100,PERCENT)
+        rapidstatus = True
+        shoot.stop()
+
+
+def armfunc():
+    arm.spin_to_position(-436.50,DEGREES)
+    arm.set_stopping(HOLD)
+    wait(3,SECONDS)
+    arm.spin_to_position(0,DEGREES)
+    
+def togglepunch():
+    global punchstatus
+    if punchstatus == True:
+        punchstatus = False
+        shoot.stop()
+    else:
+        shoot.spin(REVERSE)
+        punchstatus = True
+
+
+def toggleroller():
+    global status
+    if status == False:
+        roller.spin(REVERSE)
+        status = True
+    else:
+        status = False
+        roller.stop()
+
+def squareconverter(param):
+    return 28*param*10
+def rgb():
+    while True:
+        touch.set_fade(FadeType.SLOW)
+        touch.set_color(Color.RED)
+        wait(3,SECONDS)
+        touch.set_color(Color.BLUE)
+        wait(3,SECONDS)
+        touch.set_color(Color.GREEN)
+        wait(3,SECONDS)
+        touch.set_color(Color.BLUE_GREEN)
+        wait(3,SECONDS)
+        touch.set_color(Color.WHITE)
+        wait(3,SECONDS)
+        touch.set_color(Color.PURPLE)
+        wait(3,SECONDS)
+
+
+
+
+def BrainData():
+    while True:
+        brain.screen.set_font(FontType.MONO15)
+        brain.screen.print("ArmPos:" + str(arm.position(DEGREES)))
+        brain.screen.set_cursor(2,1)
+        brain.screen.print("RollStatus:" + str(status))
+        brain.screen.set_cursor(3,1)
+        wait(0.1,SECONDS)
+        brain.screen.clear_screen()
+        brain.screen.set_cursor(1,1)
+
+def togglepercise():
+    global percisestatus
+    if percisestatus == True:
+        percisestatus = False
+        drivetrain.set_drive_velocity(100,PERCENT)
+        drivetrain.set_turn_velocity(100,PERCENT)
+    else:
+        percisestatus = True
+        drivetrain.set_drive_velocity(20,PERCENT)
+        drivetrain.set_turn_velocity(10,PERCENT)
+def defultmove(direction,amount):
+    drivetrain.drive_for(direction,squareconverter(amount),MM,wait=True)
+
+def touchcallback():
+    pass
+ 
+Thread(BrainData)
+Thread(rgb)
+#Thread(ConsoleData)
+touch.set_brightness(100)
+touch.set_color(Color.BLACK)
+roller.set_max_torque(100,PERCENT)
+roller.set_velocity(100,PERCENT)
+shoot.set_max_torque(100,PERCENT)
+shoot.set_velocity(30,PERCENT)
+touch.pressed(touchcallback)
